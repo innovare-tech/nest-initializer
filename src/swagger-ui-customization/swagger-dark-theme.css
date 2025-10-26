@@ -1,0 +1,135 @@
+/* Cores de fundo e texto geral */
+body {
+    background-color: #1a1a2e !important; /* Fundo escuro */
+    color: #e0e0e0 !important; /* Texto claro */
+}
+
+.swagger-ui .topbar {
+    background-color: #0f3460 !important; /* Barra superior mais escura */
+    border-bottom: 1px solid #16213e !important;
+}
+
+.swagger-ui .topbar .topbar-wrapper a {
+    color: #e94560 !important; /* Cor do link no topo */
+}
+
+/* Botões e elementos interativos */
+.swagger-ui .btn {
+    background-color: #e94560 !important; /* Botões vibrantes */
+    border: 1px solid #e94560 !important;
+    color: #e0e0e0 !important;
+}
+
+.swagger-ui .btn.authorize {
+    background-color: #533483 !important; /* Botão Authorize diferente */
+    border-color: #533483 !important;
+}
+
+/* Seções de operação (GET, POST, etc.) */
+.swagger-ui .opblock {
+    background-color: #16213e !important; /* Fundo das operações */
+    border-color: #2b2c3d !important;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+    /* Cores para os verbos HTTP */
+    background-color: #2b2c3d !important;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method { background-color: #007bff !important; } /* Azul para GET */
+.swagger-ui .opblock.opblock-post .opblock-summary-method { background-color: #28a745 !important; } /* Verde para POST */
+.swagger-ui .opblock.opblock-put .opblock-summary-method { background-color: #ffc107 !important; } /* Amarelo para PUT */
+.swagger-ui .opblock.opblock-delete .opblock-summary-method { background-color: #dc3545 !important; } /* Vermelho para DELETE */
+.swagger-ui .opblock.opblock-patch .opblock-summary-method { background-color: #fd7e14 !important; } /* Laranja para PATCH */
+
+.swagger-ui .opblock .opblock-summary {
+    border-color: #0f3460 !important; /* Borda da sumarização da operação */
+}
+
+.swagger-ui .opblock .opblock-section-header {
+    background-color: #0f3460 !important; /* Header da seção da operação */
+    border-color: #1a1a2e !important;
+}
+
+/* Modelos e esquemas */
+.swagger-ui .model-box {
+    background-color: #2b2c3d !important; /* Fundo dos modelos */
+    border-color: #1a1a2e !important;
+}
+
+.swagger-ui .response-col_description {
+    color: #e0e0e0 !important;
+}
+
+/* Tabela de parâmetros */
+.swagger-ui table.parameters {
+    background-color: #16213e !important;
+    color: #e0e0e0 !important;
+}
+
+.swagger-ui table.parameters thead {
+    background-color: #0f3460 !important;
+}
+
+.swagger-ui .markdown p, .swagger-ui .markdown pre {
+    color: #e0e0e0 !important;
+}
+
+/* Cores de status de resposta */
+.swagger-ui .response-col_status {
+    color: #e94560 !important;
+}
+
+/* Outros elementos */
+.swagger-ui input[type="text"],
+.swagger-ui textarea,
+.swagger-ui select {
+    background-color: #2b2c3d !important;
+    border-color: #0f3460 !important;
+    color: #e0e0e0 !important;
+}
+
+.swagger-ui .info {
+    background-color: #16213e !important;
+    border: 1px solid #0f3460 !important;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.swagger-ui .info h2 {
+    color: #e94560 !important; /* Título da API */
+    border-bottom: 2px solid #0f3460;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.swagger-ui .info p {
+    color: #c0c0c0 !important;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.swagger-ui .info .description {
+    max-width: 800px;
+}
+
+/* Estilo para links dentro da info */
+.swagger-ui .info a {
+    color: #5cb3ff !important; /* Cor de links */
+    text-decoration: none;
+}
+
+.swagger-ui .info a:hover {
+    text-decoration: underline;
+}
+
+/* Logo da aplicação se existir */
+.swagger-ui .topbar-wrapper img {
+    content: url('https://via.placeholder.com/150x40/0f3460/e94560?text=LogoAPI') !important; /* Exemplo de logo, substitua pela sua */
+    max-width: 150px;
+    height: 40px;
+    margin-right: 15px;
+}
