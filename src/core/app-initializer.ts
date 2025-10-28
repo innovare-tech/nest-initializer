@@ -28,7 +28,12 @@ import {
   NestFactory,
   Reflector,
 } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import {
+  DocumentBuilder,
+  SwaggerCustomOptions,
+  SwaggerDocumentOptions,
+  SwaggerModule,
+} from '@nestjs/swagger';
 import compression from 'compression';
 import helmet from 'helmet';
 
@@ -48,6 +53,10 @@ import {
   MongooseStarterOptions,
   TypeOrmStarterOptions,
 } from '../starters';
+import {
+  ResponseMapper,
+  ResponsePatternInterceptor,
+} from '../interceptors/response-pattern.interceptor';
 
 type AnyModule =
   | Type
@@ -68,13 +77,24 @@ export interface AppInitializerPlugin {
 }
 
 /**
+ * Representa uma tag na documentação Swagger (OpenAPI).
+ */
+export type SwaggerDocumentTags = {
+  name: string;
+  description?: string;
+};
+
+/**
  * Opções para a configuração do Swagger (OpenAPI).
  */
 export type SwaggerOptions = {
   title: string;
   description: string;
   version: string;
+  tags?: SwaggerDocumentTags[];
   path?: string;
+  documentOptions?: SwaggerDocumentOptions;
+  customOptions?: SwaggerCustomOptions;
 };
 
 /**
@@ -108,6 +128,7 @@ export class AppInitializer<T extends INestApplication = INestApplication> {
   };
   private autoDiscoveredComponents?: { providers: Type[]; controllers: Type[] };
   private readonly globalProviders: Provider[] = [];
+  private readonly globalInterceptors: NestInterceptor[] = [];
   private readonly factoryGeneratedControllers: Type[] = [];
 
   private constructor(module: Type, adapter?: AbstractHttpAdapter) {
@@ -496,6 +517,25 @@ export class AppInitializer<T extends INestApplication = INestApplication> {
     return this;
   }
 
+  /**
+   * Adiciona um Interceptor global diretamente (instância).
+   * @param interceptor
+   */
+  public addGlobalInterceptor(interceptor: NestInterceptor): this {
+    this.globalInterceptors.push(interceptor);
+    return this;
+  }
+
+  /**
+   * Adiciona um ResponseMapper global para padronizar respostas.
+   * @param mapper
+   */
+  public withResponseMapper(mapper: ResponseMapper<T>): this {
+    this.globalInterceptors.push(new ResponsePatternInterceptor(mapper));
+
+    return this;
+  }
+
   private async listen(): Promise<void> {
     this.logger.log('Criando a instância da aplicação NestJS...');
 
@@ -538,41 +578,32 @@ export class AppInitializer<T extends INestApplication = INestApplication> {
       await plugin.apply(this.app);
     }
 
+    for (const interceptor of this.globalInterceptors) {
+      this.app.useGlobalInterceptors(interceptor);
+    }
+
     if (this.swaggerOptions) {
-      const config = new DocumentBuilder()
+      const documentBuilder = new DocumentBuilder()
         .setTitle(this.swaggerOptions.title)
         .setDescription(this.swaggerOptions.description)
-        .setVersion(this.swaggerOptions.version)
-        .addBearerAuth()
-        .build();
-      const document = SwaggerModule.createDocument(this.app, config);
-      const swaggerSetupOptions: Record<string, any> = {};
-      if (this.advancedSwaggerUiOptions?.customCss) {
-        swaggerSetupOptions.customCssUrl =
-          this.advancedSwaggerUiOptions.customCss;
+        .setVersion(this.swaggerOptions.version);
+
+      for (const tag of this.swaggerOptions.tags ?? []) {
+        documentBuilder.addTag(tag.name, tag.description);
       }
-      if (this.advancedSwaggerUiOptions?.customJs) {
-        swaggerSetupOptions.customJsUrl =
-          this.advancedSwaggerUiOptions.customJs;
-      }
-      swaggerSetupOptions.swaggerOptions = {
-        docExpansion: 'none',
-        filter: true,
-        showRequestDuration: true,
-        deepLinking: true,
-        displayRequestDuration: true,
-        tryItOutEnabled: true,
-        persistAuthorization: true,
-        defaultModelsExpandDepth: -1,
-        operationsSorter: 'alpha',
-        tagsSorter: 'alpha',
-      };
+
+      const config = documentBuilder.build();
+      const document = SwaggerModule.createDocument(
+        this.app,
+        config,
+        this.swaggerOptions.documentOptions,
+      );
 
       SwaggerModule.setup(
         this.swaggerOptions.path ?? 'docs',
         this.app,
         document,
-        swaggerSetupOptions,
+        this.swaggerOptions.customOptions,
       );
     }
 

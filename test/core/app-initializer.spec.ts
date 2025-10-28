@@ -46,6 +46,7 @@ import * as MetricsModule from '../../src/features/metrics/metrics.module';
 import helmet from 'helmet';
 import compression from 'compression';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { ResponseMapper } from '../../src/interceptors/response-pattern.interceptor';
 
 jest.mock('../../src/core/auto-discovery.helper');
 jest.mock('../../src/core/config-validator.helper');
@@ -101,6 +102,9 @@ const mockTypeOrmStarter = {
   createTypeOrmStarter: jest
     .fn()
     .mockReturnValue({ module: 'TypeOrmModuleInstance', plugins: [] }),
+};
+const mockGlobalInterceptor: NestInterceptor = {
+  intercept: jest.fn(),
 };
 
 @Module({})
@@ -594,39 +598,36 @@ describe('AppInitializer', () => {
       expect(SwaggerModule.createDocument).toHaveBeenCalledWith(
         mockNestApp,
         {},
+        undefined,
       );
       expect(SwaggerModule.setup).toHaveBeenCalledTimes(1);
       expect(SwaggerModule.setup).toHaveBeenCalledWith(
         'docs',
         mockNestApp,
         {},
-        expect.objectContaining({ swaggerOptions: expect.any(Object) }),
+        undefined,
       );
     });
 
-    it('should setup advanced Swagger UI if configured', async () => {
-      const swaggerOptions: SwaggerOptions = {
-        title: 'My API',
-        version: '1.0',
-        description: 'API Desc',
-        path: 'api-docs',
+    it('should setup app with response mapper interceptor', async () => {
+      const responseMapper: ResponseMapper<any> = () => {
+        return '123';
       };
-      initializer.withSwagger(swaggerOptions);
-      initializer.withAdvancedSwaggerUI();
-      (mockNestApp as any).useStaticAssets = jest.fn();
+
+      initializer.withResponseMapper(responseMapper);
 
       await initializer['listen']();
 
-      expect(SwaggerModule.setup).toHaveBeenCalledTimes(1);
-      expect(SwaggerModule.setup).toHaveBeenCalledWith(
-        'api-docs',
-        mockNestApp,
-        {},
-        expect.objectContaining({
-          customCssUrl: expect.stringContaining('swagger-dark-theme.css'),
-          customJsUrl: expect.stringContaining('swagger-custom.js'),
-          swaggerOptions: expect.any(Object),
-        }),
+      expect(mockNestApp.useGlobalInterceptors).toHaveBeenCalledTimes(1);
+    });
+
+    it('should setup app with global interceptors', async () => {
+      initializer.addGlobalInterceptor(mockGlobalInterceptor);
+
+      await initializer['listen']();
+      expect(mockNestApp.useGlobalInterceptors).toHaveBeenCalledTimes(1);
+      expect(mockNestApp.useGlobalInterceptors).toHaveBeenCalledWith(
+        mockGlobalInterceptor,
       );
     });
 
